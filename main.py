@@ -1,6 +1,6 @@
 import os
+import glob
 from pathlib import Path
-
 import google.generativeai as genai
 import streamlit as st
 from dotenv import load_dotenv
@@ -21,29 +21,40 @@ def main():
     The main function of the Streamlit app.
     """
 
-    st.title("Upload Your csv")
-    uploaded_file = st.file_uploader(
-        "telechargez votre fichier csv", type="csv")
-    save_directory = "data"  # You can change this to your desired directory
+  # Title
+st.title("Natural Language Generation using Annual Financial Report Data using Large Language Model (Gemini 1.5 Flash)")
 
+save_directory = "data"  # Directory to save or check for the file
+os.makedirs(save_directory, exist_ok=True)
+
+# Check if a file already exists in the data directory
+existing_files = glob.glob(os.path.join(save_directory, "*.csv"))
+
+if existing_files:
+    saved_file_path = existing_files[0]  # Use the first found CSV file
+   # st.success(f"Using existing file: {os.path.basename(saved_file_path)}")
+else:
+    uploaded_file = st.file_uploader("Syed Farhan Mohsin", type=["csv"])
     if uploaded_file is not None:
-        # Ensure the data directory exists
-        # Create the directory if it doesn't exist, ignoring errors if it already exists
-        os.makedirs(save_directory, exist_ok=True)
         saved_file_path = save_uploaded_file(uploaded_file, save_directory)
-        chat_session = model.start_chat(
-            history=[
-                {
-                    "role": "user",
-                    "parts": extract_csv_content(saved_file_path)
-                }
-            ]
-        )
-        user_question = st.text_input("Ask your questions")
-        if user_question:
+    else:
+        st.warning("Please upload a data file to continue.")
+        st.stop()  # Stop execution until a file is uploaded
 
-            response = chat_session.send_message(user_question)
-            st.write(response.text)
+# Proceed with reading and interacting with the file
+chat_session = model.start_chat(
+    history=[
+        {
+            "role": "user",
+            "parts": extract_csv_content(saved_file_path)
+        }
+    ]
+)
+
+user_question = st.text_input("Ask your competency questions here")
+if user_question:
+    response = chat_session.send_message(user_question)
+    st.write(response.text)
 
 
 if __name__ == "__main__":
