@@ -46,7 +46,7 @@ def save_uploaded_file(uploaded_file, save_directory):
     success_message.empty()  # Empty the success message
 
     # Create a DataFrame from the saved CSV file
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, encoding='Windows-1252')
 
     # Display the first few rows of the DataFrame
     st.write("Preview of the DataFrame:")
